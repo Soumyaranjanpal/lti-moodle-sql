@@ -1,16 +1,20 @@
 import { randomBytes, generateKeyPairSync } from "node:crypto";
 import jwt, { GetPublicKeyOrSecret, Secret, VerifyOptions } from "jsonwebtoken";
 import jwksRsa from "jwks-rsa";
-import usePublicKeyStorage from "../storage/publicKey";
-import usePrivateKeyStorage from "../storage/privateKey";
+// import usePublicKeyStorage from "../storage/publicKey";
+import { getPrivateKey } from "../storage/privateKey";
 import { IDTokenPayload } from "../types/idToken";
 import useNonceStorage from "../storage/nonce";
 import { Platform } from "../types/platform";
 import { getPlatform } from "../storage/platform";
 
-export async function generatePlatformKeyPair(): Promise<string> {
-  const publicKeyStorage = usePublicKeyStorage();
-  const privateKeyStorage = usePrivateKeyStorage();
+export async function generatePlatformKeyPair(): Promise<{
+  kid: string;
+  publicKey: string;
+  privateKey: string;
+}> {
+  // const publicKeyStorage = usePublicKeyStorage();
+  // const privateKeyStorage = usePrivateKeyStorage();
   const kid = randomBytes(16).toString("hex");
 
   const { publicKey, privateKey } = generateKeyPairSync("rsa", {
@@ -25,12 +29,12 @@ export async function generatePlatformKeyPair(): Promise<string> {
     },
   });
 
-  console.info("Storing public and private keys for platform", kid);
+  // console.info("Storing public and private keys for platform", kid);
   console.info({ publicKey, privateKey });
-  await publicKeyStorage.setItem(kid, publicKey);
-  await privateKeyStorage.setItem(kid, privateKey);
+  // await publicKeyStorage.setItem(kid, publicKey);
+  // await privateKeyStorage.setItem(kid, privateKey);
 
-  return kid;
+  return { kid, publicKey, privateKey };
 }
 
 export class PlatformNotFoundError extends Error {
@@ -113,8 +117,7 @@ export async function getAccessToken(
   platform: Platform,
   scopes: string[]
 ): Promise<{ tokenType: string; accessToken: string }> {
-  const privateKeyStorage = usePrivateKeyStorage();
-  const platformPrivateKey = await privateKeyStorage.getItem(platform.kid);
+  const platformPrivateKey = await getPrivateKey(platform.kid);
   if (!platformPrivateKey) throw new PlatformPrivateKeyNotFoundError();
 
   const randomJti = encodeURIComponent(

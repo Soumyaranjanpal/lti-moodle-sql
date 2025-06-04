@@ -5,10 +5,13 @@ CREATE TABLE platforms (
   client_id VARCHAR(255) NOT NULL,
   authentication_endpoint TEXT NOT NULL,
   accesstoken_endpoint TEXT NOT NULL,
-  auth_method VARCHAR(50) NOT NULL,  -- e.g., "JWK_SET"
-  auth_key TEXT NOT NULL,            -- e.g., jwks_uri
+  auth_method VARCHAR(50) NOT NULL,
+  auth_key TEXT NOT NULL,
   kid VARCHAR(255) NOT NULL,
+  public_key TEXT NOT NULL,
+  private_key TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY unique_platform (url, client_id)
 );
+
 

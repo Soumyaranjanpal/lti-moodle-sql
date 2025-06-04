@@ -1,6 +1,6 @@
 import { ZodError, z } from "zod";
 import { getPlatform } from "../storage/platform";
-import usePrivateKeyStorage from "../storage/privateKey";
+import { getPrivateKey } from "../storage/privateKey";
 import { jwtVerify } from "../utils/auth";
 import jwt from "jsonwebtoken";
 import { ToolLtiTokenPayload } from "../types/toolLtiToken";
@@ -130,9 +130,7 @@ export default defineEventHandler(async (event) => {
     });
   }
   console.log("[LTI] Platform config found:", platform);
-
-  const privateKeyStorage = usePrivateKeyStorage();
-  const platformPrivateKey = await privateKeyStorage.getItem(platform.kid);
+  const platformPrivateKey = await getPrivateKey(platform.kid);
   if (!platformPrivateKey) {
     console.warn("[LTI] Platform private key not found for KID:", platform.kid);
     throw createError({

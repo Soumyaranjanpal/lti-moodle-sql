@@ -98,7 +98,7 @@ export default defineEventHandler(async (event) => {
     configuration["https://purl.imsglobal.org/spec/lti-platform-configuration"]
       .product_family_code;
 
-  const kid = await generatePlatformKeyPair();
+  const { kid, privateKey, publicKey } = await generatePlatformKeyPair();
   const platform = {
     url: configuration.issuer,
     name: platformName,
@@ -139,8 +139,8 @@ export default defineEventHandler(async (event) => {
   await connection.execute(
     `INSERT INTO platforms (
     url, name, client_id, authentication_endpoint,
-    accesstoken_endpoint, auth_method, auth_key, kid
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    accesstoken_endpoint, auth_method, auth_key, kid,  public_key, private_key
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       platform.url,
       platform.name,
@@ -150,6 +150,8 @@ export default defineEventHandler(async (event) => {
       platform.authConfig.method,
       platform.authConfig.key,
       platform.kid,
+      publicKey,
+      privateKey,
     ]
   );
   // await storage.setItem(`${platform.url}:${platform.clientId}`, platform);
