@@ -3,7 +3,7 @@ import { jwtVerify } from "../utils/auth";
 import jwt from "jsonwebtoken";
 import { ToolLtiTokenPayload } from "../types/toolLtiToken";
 import { getPlatform } from "../storage/platform";
-import useIDTokenStorage, { getIDTokenStorageKey } from "../storage/idToken";
+import { getIDToken } from "../storage/idToken";
 
 const createScoreBodySchema = z.object({
   score: z.number(),
@@ -79,15 +79,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const idTokenStorage = useIDTokenStorage();
-  const idToken = await idTokenStorage.getItem(
-    getIDTokenStorageKey({
-      issuer: platformUrl,
-      clientId,
-      deploymentId,
-      userId,
-    })
-  );
+  const idToken = await getIDToken({
+    issuer: platformUrl,
+    clientId,
+    deploymentId,
+    userId,
+  });
   if (!idToken) {
     throw createError({
       statusCode: 404,

@@ -7,7 +7,7 @@ import {
 } from "../utils/auth";
 import { getStateCookieName } from "../utils/cookie";
 import jwt from "jsonwebtoken";
-import useIDTokenStorage, { getIDTokenStorageKey } from "../storage/idToken";
+import { storeIDToken } from "../storage/idToken";
 
 const deepLinkLaunchBodySchema = z.object({
   id_token: z.string(),
@@ -94,22 +94,27 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const idTokenStorage = useIDTokenStorage();
-  const idTokenStorageKey = getIDTokenStorageKey({
-    issuer: tokenPayload.iss,
-    clientId: tokenPayload.aud,
-    deploymentId:
-      tokenPayload["https://purl.imsglobal.org/spec/lti/claim/deployment_id"],
-    userId: tokenPayload.sub,
-  });
+  // const idTokenStorage = useIDTokenStorage();
+  // const idTokenStorageKey = getIDTokenStorageKey({
+  //   issuer: tokenPayload.iss,
+  //   clientId: tokenPayload.aud,
+  //   deploymentId:
+  //     tokenPayload["https://purl.imsglobal.org/spec/lti/claim/deployment_id"],
+  //   userId: tokenPayload.sub,
+  // });
 
-  console.info("[LTI] Storing ID token with key:", idTokenStorageKey);
-  await idTokenStorage.setItem(idTokenStorageKey, tokenPayload);
+  // console.info("[LTI] Storing ID token with key:", idTokenStorageKey);
+  // await idTokenStorage.setItem(idTokenStorageKey, tokenPayload);
+
+  await storeIDToken(tokenPayload);
 
   const ltiToken = createToolLtiToken(tokenPayload);
   console.log("[LTI] Created LTI token:", ltiToken);
 
-  const url = new URL("deep-link-select", serverUrl);
+  const url = new URL(
+    "deep-link-select",
+    "https://fb69jx5l-3001.use.devtunnels.ms/"
+  );
   url.searchParams.append("lti", ltiToken);
 
   console.log("[LTI] Redirecting to:", url.href);

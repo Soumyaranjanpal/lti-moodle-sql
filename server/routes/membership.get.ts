@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { getAccessToken, jwtVerify } from "../utils/auth";
 import { getPlatform } from "../storage/platform";
 import { ToolLtiTokenPayload } from "../types/toolLtiToken";
-import useIDTokenStorage, { getIDTokenStorageKey } from "../storage/idToken";
+import { getIDToken } from "../storage/idToken";
 
 export default defineEventHandler(async (event) => {
   const { jwtSecret } = useRuntimeConfig();
@@ -53,15 +53,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const idTokenStorage = useIDTokenStorage();
-  const idToken = await idTokenStorage.getItem(
-    getIDTokenStorageKey({
-      issuer: platformUrl,
-      clientId,
-      deploymentId,
-      userId,
-    })
-  );
+  const idToken = await getIDToken({
+    issuer: platformUrl,
+    clientId,
+    deploymentId,
+    userId,
+  });
   if (!idToken) {
     throw createError({
       statusCode: 404,

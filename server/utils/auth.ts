@@ -184,3 +184,14 @@ export function jwtVerify(
     });
   });
 }
+
+const priorityKeywords = ["Administrator", "Instructor", "Learner"];
+
+export function getHighestPriorityRole(roles: string[]) {
+  for (const keyword of priorityKeywords) {
+    if (roles.some((role) => role.includes(`#${keyword}`))) {
+      return keyword;
+    }
+  }
+  return null;
+}

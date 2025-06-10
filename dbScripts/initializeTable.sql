@@ -14,4 +14,14 @@ CREATE TABLE platforms (
   UNIQUE KEY unique_platform (url, client_id)
 );
 
+CREATE TABLE id_tokens (
+  issuer VARCHAR(255) NOT NULL,
+  client_id VARCHAR(128) NOT NULL,
+  deployment_id VARCHAR(128) NOT NULL,
+  user_id VARCHAR(128) NOT NULL,
+  payload JSON NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (issuer, client_id, deployment_id, user_id)
+);
+
 

@@ -6,4 +6,11 @@ export default defineNuxtConfig({
     serverUrl: "",
     jwtSecret: "",
   },
+  devServer: {
+    cors: {
+      origin: ["*"],
+      allowHeaders: ["*"],
+      methods: ["POST", "GET"],
+    },
+  },
 });

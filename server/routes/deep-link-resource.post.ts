@@ -4,13 +4,25 @@ import { getPrivateKey } from "../storage/privateKey";
 import { jwtVerify } from "../utils/auth";
 import jwt from "jsonwebtoken";
 import { ToolLtiTokenPayload } from "../types/toolLtiToken";
-import useIDTokenStorage, { getIDTokenStorageKey } from "../storage/idToken";
+import { getIDToken } from "../storage/idToken";
 
 const deepLinkResourceBodySchema = z.object({
   resourceId: z.number(),
 });
 
 export default defineEventHandler(async (event) => {
+  console.log("This is from here");
+  appendResponseHeaders(event, {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  });
+
+  // Handle preflight OPTIONS request
+  if (event.method === "OPTIONS") {
+    return ""; // respond with 200 OK
+  }
+
   const body = await readBody(event);
   console.log("[LTI] Launch Body received:", body);
 
@@ -145,17 +157,15 @@ export default defineEventHandler(async (event) => {
     expiresIn: 120,
     keyid: platform.kid,
   });
-  console.log("[LTI] Signed JWT for deep linking response");
+  console.log("[LTI] Signed JWT for deep linking response", message);
 
-  const idTokenStorage = useIDTokenStorage();
-  const idToken = await idTokenStorage.getItem(
-    getIDTokenStorageKey({
-      issuer: platformUrl,
-      clientId,
-      deploymentId,
-      userId,
-    })
-  );
+  const idToken = await getIDToken({
+    issuer: platformUrl,
+    clientId,
+    deploymentId,
+    userId,
+  });
+
   if (!idToken) {
     console.warn("[LTI] ID token not found for user:", {
       issuer: platformUrl,
